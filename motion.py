@@ -54,7 +54,7 @@ def spindleOff(path):
     return
 
 #def patternRec(path, rows, cols, spacingX, spacingY, depth, moveSpeed):
-def patternRec(path, startX, startY, endX, endY, depth, rows, cols, moveSpeed, spindleSpeed=None):
+def drillPatternRec(path,startX, startY, endX, endY, depth, rows, cols, moveSpeed, spindleSpeed=None, action=None):
     # move to relative position first
     xSpacing = (endX-startX)/(rows-1)
     ySpacing = (endY-startY)/(cols-1)
@@ -91,10 +91,45 @@ def patternRec(path, startX, startY, endX, endY, depth, rows, cols, moveSpeed, s
             r = r + 1
             if r < rows:
                 file.write(f"G01 Y{ySpacing} F{moveSpeed};\n")
-            
-            
+                
         # turn spindle off
         if spindleSpeed is not None:
             file.write(f"M05;\n")
     
+    return
+    
+def actionPatternRec(path,startX, startY, endX, endY, rows, cols, action=None):
+    # move to relative position first
+    xSpacing = (endX-startX)/(rows-1)
+    ySpacing = (endY-startY)/(cols-1)
+    
+    with open(path,'a') as file:
+        # Ensure system is set to relative movements
+        file.write(f"G21;\nG91;\n")
+
+        r = 0
+        while r < rows:
+            c = 0
+            
+            while c < (cols):
+                #print(f"({r},{c})")
+                if r%2 == 1:
+                    sign = "-"
+                else:
+                    sign = ""
+                # insert Action Code
+                if action is not None:
+                    file.write(action)
+                else:
+                    file.write(";\n")
+                # Move to next Column
+                c = c + 1
+                if c < cols:
+                    file.write(f"G00 X{sign}{xSpacing};\n")
+                
+            #advance Y, advance to next row
+            r = r + 1
+            if r < rows:
+                file.write(f"G00 Y{ySpacing};\n")
+
     return
